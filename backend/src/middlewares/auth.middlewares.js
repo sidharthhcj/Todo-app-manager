@@ -1,18 +1,52 @@
+// import jwt from "jsonwebtoken";
+// import { User } from "../models/user.models.js";
+
+// const authUser = async (req, res, next) => {
+//   const { token } = req.cookies;
+//   const isLoggedIn = jwt.verify(token, process.env.TOKEN_SECRET);
+//   if (!isLoggedIn) {
+//     return res.status(401).send("Session Expired");
+//   }
+//   const user = await User.findById(isLoggedIn.id);
+//   if (!user) {
+//     return res.status(401).send("User not logged in");
+//   }
+//   req.user = user;
+//   next();
+// };
+
+// export { authUser };
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.models.js";
 
 const authUser = async (req, res, next) => {
-  const { token } = req.cookies;
-  const isLoggedIn = jwt.verify(token, process.env.TOKEN_SECRET);
-  if (!isLoggedIn) {
-    return res.status(401).send("Session Expired");
+  // ✅ Allow CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return next();
   }
-  const user = await User.findById(isLoggedIn.id);
+
+  const token = req.cookies?.token;
+
+  // ✅ Handle missing token safely
+  if (!token) {
+    return res.status(401).send("No token found");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+  } catch (err) {
+    return res.status(401).send("Invalid or expired token");
+  }
+
+  const user = await User.findById(decoded.id);
   if (!user) {
     return res.status(401).send("User not logged in");
   }
+
   req.user = user;
   next();
 };
 
 export { authUser };
+

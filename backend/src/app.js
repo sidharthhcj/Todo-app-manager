@@ -7,6 +7,7 @@ import { authRouter } from "./routes/auth.routes.js";
 import { todoRouter } from "./routes/todo.routes.js";
 import cors from "cors";
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(
