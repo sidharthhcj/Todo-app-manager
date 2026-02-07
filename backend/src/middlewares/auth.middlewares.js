@@ -20,28 +20,28 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.models.js";
 
 const authUser = async (req, res, next) => {
-  // ✅ Allow CORS preflight requests
+  // ✅ Allow CORS preflight
   if (req.method === "OPTIONS") {
     return next();
   }
 
   const token = req.cookies?.token;
 
-  // ✅ Handle missing token safely
+  // ✅ If token missing, DO NOT crash
   if (!token) {
-    return res.status(401).send("No token found");
+    return res.status(401).json({ message: "No token provided" });
   }
 
   let decoded;
   try {
     decoded = jwt.verify(token, process.env.TOKEN_SECRET);
   } catch (err) {
-    return res.status(401).send("Invalid or expired token");
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 
   const user = await User.findById(decoded.id);
   if (!user) {
-    return res.status(401).send("User not logged in");
+    return res.status(401).json({ message: "User not found" });
   }
 
   req.user = user;
@@ -49,4 +49,3 @@ const authUser = async (req, res, next) => {
 };
 
 export { authUser };
-
