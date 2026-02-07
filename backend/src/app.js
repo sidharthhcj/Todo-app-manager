@@ -9,7 +9,17 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// ✅ VERY IMPORTANT: preflight support
+app.options("*", cors());
 app.use("/auth", authRouter);
 app.use("/todo", todoRouter);
 export { app };
